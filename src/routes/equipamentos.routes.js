@@ -9,15 +9,14 @@ rotas.get("/:id", equipamentosController.listarPorId);
 
 
 // POST: Cria um novo registro
-
+rotas.post("/", equipamentosController.cadastrar);
 
 
 // PUT: Atualizar um registro existente
-
-
+rotas.put("/:id", equipamentosController.atualizar);
 
 
 // DELETE: Deletar um registro 
-
+rotas.delete("/:id", equipamentosController.deletar);
 
 module.exports = rotas;

@@ -1,11 +1,11 @@
 const express = require("express");
 const path = require("path");
-// Importar o index.js da pasta routes futuramente
-// const rotas = require("./routes"); 
+
+//Importação das rotas
+const equipamentosRoutes = require("./routes/equipamentos.routes");
+
 
 const app = express();
-// Define a porta (pega do .env se existir, ou usa a 3000 por padrão)
-const PORT = process.env.PORT || 3000;
 
 // Permite que a API receba dados no formato JSON
 app.use(express.json());
@@ -13,8 +13,8 @@ app.use(express.json());
 // Servindo arquivos estáticos da pasta public (para a logo funcionar)
 app.use(express.static(path.join(__dirname, "../public")));
 
-// Aqui nós vamos dizer para o app usar as rotas que criarmos
-// app.use("/api", rotas);
+//Ligação das Rotas
+app.use("/api/equipamentos", equipamentosRoutes);
 
 // Rota Principal (Página de boas-vindas)
 app.get("/", (req, res) => {
@@ -60,6 +60,8 @@ app.get("/", (req, res) => {
     `);
 });
 
+// Define a porta (pega do .env se existir, ou usa a 3000 por padrão)
+const PORT = process.env.PORT || 3000;
 // "Ligando" o servidor na porta especificada
 app.listen(PORT, () => {
     console.log(`🚀 Servidor da ONG Apoio Pleno rodando na porta ${PORT}`);
