@@ -3,14 +3,20 @@
         "aquisicao",
         "beneficiario",
         "beneficiarios",
+        "Dafoto",
         "descricao",
         "devolucao",
         "doacao",
         "doacoes",
+        "emprestimo",
+        "Emprestimo",
         "emprestimos",
         "endereco",
+        "joao",
         "manutencoes",
         "observacoes",
-        "responsavel"
+        "originalname",
+        "responsavel",
+        "Unico"
     ]
 }

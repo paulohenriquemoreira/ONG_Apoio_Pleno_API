@@ -29,6 +29,7 @@ const equipamentosController = {
   //Função de listar por id
   listarPorId: async (req, res) => {
     try {
+      //Receber o ID do item selecionado
       const { id } = req.params;
 
       //Usa a função de conectar ao banco!
@@ -37,12 +38,12 @@ const equipamentosController = {
       // O banco busca os dados e guarda na variável 'equipamentos'
       const equipamentoEspecifico = await db.get(
         `SELECT * FROM equipamentos WHERE id = ?`,
-        [id],
+        [id]
       );
 
       //Se busca não localizou registro
       if (!equipamentoEspecifico) {
-        // Colocamos o return para ele encerrar a função aqui e não tentar enviar o 200
+        // O return serve para ele encerrar a função aqui e não tentar enviar o 200
         return res
           .status(404)
           .json({ mensagem: "Equipamento não encontrado." });
@@ -67,10 +68,13 @@ const equipamentosController = {
         descricao,
         categoria,
         numero_serie,
-        status,
+        status,  // O front PODE mandar o status (ex: "Em manutenção")
         data_aquisicao,
         observacoes,
       } = req.body;
+
+      //Se o Front-end NÃO mandar status nenhum, será forçado o padrão!
+      const statusDefinitivo = status ? status : "Disponível";
 
       //Usa a função de conectar ao banco!
       const db = await conectarBanco();
@@ -82,7 +86,7 @@ const equipamentosController = {
           descricao,
           categoria,
           numero_serie,
-          status,
+          statusDefinitivo,
           data_aquisicao,
           observacoes,
         ],
@@ -174,14 +178,14 @@ const equipamentosController = {
           });
       }
 
-      // Caso exista, será deletado
-      await db.run(`DELETE FROM equipamentos WHERE id = ?`, [id]);
+        // Caso exista, será deletado
+        await db.run(`DELETE FROM emprestimos WHERE id = ?`, [id]);
 
-      res
-        .status(200)
-        .json({
-          mensagem: `O equipamento "${equipamento.nome}" foi deletado com sucesso!`,
-        });
+        res
+          .status(200)
+          .json({
+            mensagem: `O equipamento emprestado "${equipamento.nome}" foi deletado com sucesso!`,
+          });
     } catch (error) {
       // O catch fica só para erros graves do servidor
       console.error("❌ Erro ao deletar equipamento por ID:", error);

@@ -3,6 +3,9 @@ const path = require("path");
 
 //Importação das rotas
 const equipamentosRoutes = require("./routes/equipamentos.routes");
+const beneficiariosRoutes = require("./routes/beneficiarios.routes");
+const emprestimosRoutes = require("./routes/emprestimos.routes");
+
 
 
 const app = express();
@@ -15,6 +18,8 @@ app.use(express.static(path.join(__dirname, "../public")));
 
 //Ligação das Rotas
 app.use("/api/equipamentos", equipamentosRoutes);
+app.use("/api/beneficiarios", beneficiariosRoutes);
+app.use("/api/emprestimos", emprestimosRoutes);
 
 // Rota Principal (Página de boas-vindas)
 app.get("/", (req, res) => {
