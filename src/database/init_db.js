@@ -92,6 +92,7 @@ const criarBanco = async() => {
             custo REAL,
             responsavel TEXT,
             observacoes TEXT,
+            status  TEXT,
             data_cadastro TEXT,
             FOREIGN KEY (equipamento_id) REFERENCES equipamentos(id)
         );

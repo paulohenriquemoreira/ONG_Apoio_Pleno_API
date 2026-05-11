@@ -58,7 +58,7 @@ const emprestimosController = {
     //Função para cadastrar novo emprestimo de equipamento.
     cadastrar: async (req, res) => {
         try {
-        // 1. O Front-end só precisa mandar QUEM pegou, O QUE pegou, e se tem alguma observação.
+        // O Front-end só precisa mandar QUEM pegou, O QUE pegou, e se tem alguma observação.
         const { beneficiario_id, equipamento_id, observacoes } = req.body;
 
         const db = await conectarBanco();
@@ -130,8 +130,8 @@ const emprestimosController = {
         });
 
         } catch (error) {
-        console.error("❌ Erro ao registrar empréstimo:", error);
-        res.status(500).json({ mensagem: "Erro interno ao processar o empréstimo." });
+            console.error("❌ Erro ao registrar empréstimo:", error);
+            res.status(500).json({ mensagem: "Erro interno ao processar o empréstimo." });
         }
     },
 

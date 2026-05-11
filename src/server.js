@@ -5,6 +5,7 @@ const path = require("path");
 const equipamentosRoutes = require("./routes/equipamentos.routes");
 const beneficiariosRoutes = require("./routes/beneficiarios.routes");
 const emprestimosRoutes = require("./routes/emprestimos.routes");
+const manutencoesRoutes = require("./routes/manutencoes.routes");
 
 
 
@@ -20,6 +21,7 @@ app.use(express.static(path.join(__dirname, "../public")));
 app.use("/api/equipamentos", equipamentosRoutes);
 app.use("/api/beneficiarios", beneficiariosRoutes);
 app.use("/api/emprestimos", emprestimosRoutes);
+app.use("/api/manutencoes", manutencoesRoutes);
 
 // Rota Principal (Página de boas-vindas)
 app.get("/", (req, res) => {

@@ -1,3 +1,9 @@
 .db
 node_modules
 .env
+
+# Ignora todos os arquivos (fotos) dentro da pasta uploads
+public/uploads/*
+
+# Mas abre uma exceção (!) e mantém o arquivo .gitkeep para a pasta não sumir
+!public/uploads/.gitkeep

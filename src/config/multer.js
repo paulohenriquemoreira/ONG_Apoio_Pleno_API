@@ -1,20 +1,33 @@
-const multer = require('multer');
-const path = require('path');
+const multer = require("multer");
+const path = require("path");
 
-// Configuração de onde e como o arquivo será salvo
 const storage = multer.diskStorage({
-    // Destino: Pasta public/uploads
-    destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, '../../public/uploads'));
-    },
-    // Nome do arquivo: Vai colocar a data atual na frente para nunca ter nomes repetidos (ex: 171518293-foto-joao.png)
-    filename: function (req, file, cb) {
-        const nomeUnico = Date.now() + '-' + file.originalname;
-        cb(null, nomeUnico);
-    }
+  
 });
 
-// Criado o "estoquista" (middleware) com essa configuração
-const upload = multer({ storage: storage });
+// A REGRA DE OURO DAS EXTENSÕES
+const fileFilter = (req, file, cb) => {
+  const extensoesPermitidas = /jpeg|jpg|png|tiff|jfif|webp/i;
+  
+  // 1. Verifica a extensão
+  const extname = extensoesPermitidas.test(path.extname(file.originalname));
+  
+  // 🖨️ ISTO VAI MOSTRAR NO TERMINAL O QUE O POSTMAN ENVIOU:
+  console.log(`Tentando subir: ${file.originalname} | Mimetype interno: ${file.mimetype}`);
+  
+  // 2. Verifica se é imagem OU se é o formato genérico que o Postman manda quando se confunde
+  const isImage = file.mimetype.startsWith('image/') || file.mimetype === 'application/octet-stream';
+
+  if (extname && isImage) {
+    return cb(null, true);
+  } else {
+    cb(new Error("Extensão inválida! Envie apenas fotos (.jpg, .jpeg, .png, .tiff, .jfif, .webp)"));
+  }
+};
+
+const upload = multer({ 
+    storage: storage,
+    fileFilter: fileFilter // Adiciona o filtro aqui na exportação
+});
 
 module.exports = upload;

@@ -1,3 +1,6 @@
+
+const fs = require("fs");
+const path = require("path");
 // Importa a função de conectar ao banco
 const conectarBanco = require("../config/database");
 
@@ -107,22 +110,35 @@ const beneficiariosController = {
       } = req.body;
 
       const db = await conectarBanco();
-
-      // 1. Lógica inteligente para a foto (Sem código repetido!)
+      
+      
+      // 1. Lógica inteligente para a foto
       let nomeDaFoto;
 
-      if (req.file) {
-        // Se mandou arquivo novo pelo Postman, usa o novo
-        nomeDaFoto = req.file.filename;
-      } else {
-        // Se não mandou, busca o beneficiário antigo no banco e mantém a foto que já estava lá
-        const beneficiarioAntigo = await db.get(
-          `SELECT foto FROM beneficiarios WHERE id = ?`,
-          [id]
-        );
+      const beneficiarioAntigo = await db.get(
+        `SELECT foto FROM beneficiarios WHERE id = ?`,
+        [id]
+      );
 
+      if (req.file) {
+        // Se mandou arquivo novo, a variável assume o nome novo
+        nomeDaFoto = req.file.filename;
+
+        // O LIXEIRO AUTOMÁTICO: Se ele já tinha uma foto antes, será apagar do HD!
+        if (beneficiarioAntigo && beneficiarioAntigo.foto) {
+          // Monta o caminho exato de onde a foto antiga está salva na máquina
+          const caminhoFotoAntiga = path.join(__dirname, "../../public/uploads", beneficiarioAntigo.foto);
+          
+          // Verifica se o arquivo físico realmente existe lá antes de tentar deletar
+          if (fs.existsSync(caminhoFotoAntiga)) {
+            fs.unlinkSync(caminhoFotoAntiga); // 💥 Destrói o arquivo antigo!
+          }
+        }
+      } else {
+        // Se não mandou arquivo novo, mantém a foto que já estava lá
         nomeDaFoto = beneficiarioAntigo ? beneficiarioAntigo.foto : null;
-      }
+      };
+
 
       // 2. Agora sim, roda o UPDATE com a variável 'nomeDaFoto' decidida
       const resultado = await db.run(
@@ -161,34 +177,46 @@ const beneficiariosController = {
 
   // Função de deletar registro
 
-  deletar: async (req, res) => {
+deletar: async (req, res) => {
     try {
       const { id } = req.params;
 
       // Usar a função de conectar ao banco!
       const db = await conectarBanco();
 
-      //Busca o equipamento antes de deletar para saber o nome dele
+      // Busca o beneficiário antes de deletar para saber o nome dele e pegar a foto
       const beneficiario = await db.get(
-        `
-            SELECT * FROM beneficiarios WHERE id = ?`,
+        `SELECT * FROM beneficiarios WHERE id = ?`,
         [id],
       );
 
       // Se a busca voltou vazia, ele nem tenta deletar
       if (!beneficiario) {
         return res
-          .status(400)
+          .status(404) // 404 é o código correto para "Não encontrado"
           .json({
             mensagem: `O beneficiário de ID ${id} não foi encontrado para exclusão.`,
           });
       }
 
-      // Caso exista, será deletado
+      // ==================================================================
+      // O LIXEIRO AUTOMÁTICO: Destruindo a foto do usuário do HD
+      // ==================================================================
+      if (beneficiario.foto) {
+        // Monta o caminho exato onde a foto está salva
+        const caminhoFoto = path.join(__dirname, "../../public/uploads", beneficiario.foto);
+        
+        // Verifica se o arquivo realmente existe na pasta antes de deletar
+        if (fs.existsSync(caminhoFoto)) {
+          fs.unlinkSync(caminhoFoto); // 💥 Exclui o arquivo físico!
+        }
+      }
+
+      // Caso exista, será deletado do banco de dados
       await db.run(`DELETE FROM beneficiarios WHERE id = ?`, [id]);
 
       res.status(200).json({
-        mensagem: `O beneficiário "${beneficiario.nome}" foi deletado com sucesso!`,
+        mensagem: `O beneficiário "${beneficiario.nome}" e sua foto foram deletados com sucesso!`,
       });
 
     } catch (error) {
@@ -197,9 +225,10 @@ const beneficiariosController = {
       res
         .status(500)
         .json({ mensagem: "Erro interno ao deletar o beneficiário." });
-
     }
   },
+
+
 };
 
 module.exports = beneficiariosController;
