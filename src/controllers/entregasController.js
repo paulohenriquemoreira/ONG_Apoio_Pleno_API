@@ -36,17 +36,29 @@ const entregasController = {
     // Função cadastrar nova entrega (A SAÍDA dos alimentos/roupas)
     cadastrar: async (req, res) => {
         try {
-            // 1. Receber os dados do req.body (beneficiario_id, item, categoria, quantidade, observacoes)
+            const {beneficiario_id, item, categoria, quantidade, observacoes} = req.body;
+           
+            // Regra do Tempo: Back-end gera a data da doação (Hoje)
+            const dataHoje = new Date().toISOString().split('T')[0];
             
-            // 2. Gerar a data de hoje (dataHoje)
-
-            // 3. Conectar ao banco
+            const db = await conectarBanco();
+           
+            const entregas = await db.run(`
+                
+                INSERT INTO entregas (beneficiario_id, item, categoria, quantidade, data_entrega, observacoes)VALUES(?,?,?,?,?,?)`,
+                [
+                    beneficiario_id,
+                    item,
+                    categoria,
+                    quantidade,
+                    dataHoje,
+                    observacoes
+                ]);
             
-            // 4. Fazer o INSERT na tabela 'entregas'
-
-            // 5. Retornar res.status(201) de sucesso!
             
-            res.status(201).json({ mensagem: "Acesso à rota de cadastro funcionando! Falta a lógica do banco." });
+            res.status(201).json({ mensagem: `Entrega de ${item} registada com sucesso`,
+                id_entrega:resultado.lastID
+            });
 
         } catch (error) {
             console.error("❌ Erro ao registrar entrega:", error);

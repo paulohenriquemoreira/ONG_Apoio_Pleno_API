@@ -11,6 +11,31 @@ const criarBanco = async() => {
         driver: sqlite3.Database,
     });
 
+
+    //Criando tabela Beneficiarios
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS usuarios(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT,
+        email TEXT,
+        senha TEXT
+        );
+        
+    `);
+
+        // Inserindo o usuário Admin padrão automaticamente
+        const adminExiste = await db.get(`SELECT * FROM usuarios WHERE email = 'admin@ong.com.br'`);
+        
+        if (!adminExiste) {
+            await db.run(`
+                INSERT INTO usuarios (nome, email, senha) 
+                VALUES ('Administrador', 'admin@ong.com.br', '123456')
+            `);
+            console.log("👤 Usuário Admin criado com sucesso!");
+        }
+
+
+
         //Criando tabela Beneficiarios
     await db.exec(`
         CREATE TABLE IF NOT EXISTS beneficiarios (

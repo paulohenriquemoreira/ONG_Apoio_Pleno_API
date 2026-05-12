@@ -22,6 +22,7 @@
         "observacoes",
         "originalname",
         "responsavel",
-        "Unico"
+        "Unico",
+        "usuarios"
     ]
 }
