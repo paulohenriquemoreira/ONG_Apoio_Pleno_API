@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const cors = require('cors'); // importamos o pacote que gerencia as permissões de acesso
 
 //Importação das rotas
 const equipamentosRoutes = require("./routes/equipamentos.routes");
@@ -13,6 +14,10 @@ const usuariosRoutes = require("./routes/usuarios.routes");
 
 
 const app = express();
+
+// Ativando o CORS no servidor. 
+//Avisa ao navegador: Pode liberar o acesso para qualquer origem/site que queira consultar meus dados.
+app.use(cors());
 
 // Permite que a API receba dados no formato JSON
 app.use(express.json());
