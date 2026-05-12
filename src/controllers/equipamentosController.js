@@ -11,9 +11,9 @@ const equipamentosController = {
 
       // O banco busca os dados e guarda na variável 'equipamentos'
       const equipamentos = await db.all(`
-                SELECT *
-                FROM equipamentos        
-            `);
+          SELECT *
+          FROM equipamentos        
+      `);
 
       //Entrega a variável respondendo com o formato JSON
       res.status(200).json(equipamentos);

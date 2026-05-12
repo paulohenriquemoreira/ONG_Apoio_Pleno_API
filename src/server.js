@@ -6,6 +6,8 @@ const equipamentosRoutes = require("./routes/equipamentos.routes");
 const beneficiariosRoutes = require("./routes/beneficiarios.routes");
 const emprestimosRoutes = require("./routes/emprestimos.routes");
 const manutencoesRoutes = require("./routes/manutencoes.routes");
+const doacoesRoutes = require("./routes/doacoes.routes");
+const entregasRoutes = require("./routes/entregas.routes");
 
 
 
@@ -22,6 +24,8 @@ app.use("/api/equipamentos", equipamentosRoutes);
 app.use("/api/beneficiarios", beneficiariosRoutes);
 app.use("/api/emprestimos", emprestimosRoutes);
 app.use("/api/manutencoes", manutencoesRoutes);
+app.use("/api/doacoes", doacoesRoutes);
+app.use("/api/entregas", entregasRoutes);
 
 // Rota Principal (Página de boas-vindas)
 app.get("/", (req, res) => {
@@ -60,6 +64,7 @@ app.get("/", (req, res) => {
                     <li>GET, POST, PUT, DELETE - <b>/api/doacoes</b></li>
                     <li>GET, POST, PUT, DELETE - <b>/api/emprestimos</b></li>
                     <li>GET, POST, PUT, DELETE - <b>/api/equipamentos</b></li>
+                    <li>GET, POST, PUT, DELETE - <b>/api/entregas</b></li>
                     <li>GET, POST, PUT, DELETE - <b>/api/manutencoes</b></li>
                 </ul>
             </div>
