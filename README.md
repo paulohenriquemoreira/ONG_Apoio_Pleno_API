@@ -59,6 +59,7 @@ ONG_APOIO_PLENO/
 │   │
 │   ├── controllers/          # Regras de negócio
 │   │   ├── beneficiariosController.js
+│   │   ├── dashboardController.js
 │   │   ├── doacoesController.js
 │   │   ├── emprestimosController.js
 │   │   ├── entregasController.js
@@ -72,6 +73,7 @@ ONG_APOIO_PLENO/
 │   │
 │   ├── routes/
 │   │   ├── beneficiarios.routes.js
+│   │   ├── dashboard.routes.js
 │   │   ├── doacoes.routes.js
 │   │   ├── emprestimos.routes.js
 │   │   ├── entregas.routes.js
