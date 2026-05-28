@@ -10,6 +10,7 @@ const manutencoesRoutes = require("./routes/manutencoes.routes");
 const doacoesRoutes = require("./routes/doacoes.routes");
 const entregasRoutes = require("./routes/entregas.routes");
 const usuariosRoutes = require("./routes/usuarios.routes");
+const dashboardRoutes = require("./routes/dashboard.routes");
 
 
 
@@ -33,6 +34,7 @@ app.use("/api/manutencoes", manutencoesRoutes);
 app.use("/api/doacoes", doacoesRoutes);
 app.use("/api/entregas", entregasRoutes);
 app.use("/api/usuarios", usuariosRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Rota Principal (Página de boas-vindas)
 app.get("/", (req, res) => {
@@ -73,6 +75,7 @@ app.get("/", (req, res) => {
                     <li>GET, POST, PUT, DELETE - <b>/api/manutencoes</b></li>
                     <li>GET, POST - <b>/api/doacoes</b></li>
                     <li>GET, POST - <b>/api/entregas</b></li>
+                    <li>GET - <b>/api/dashboard</b></li>
                     <li>POST - <b>/api/usuarios/login</b> (Autenticação de Administrador)</li>
                 </ul>
             </div>

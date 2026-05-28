@@ -43,7 +43,7 @@ const entregasController = {
             
             const db = await conectarBanco();
            
-            const entregas = await db.run(`
+            const resultado = await db.run(`
                 
                 INSERT INTO entregas (beneficiario_id, item, categoria, quantidade, data_entrega, observacoes)VALUES(?,?,?,?,?,?)`,
                 [

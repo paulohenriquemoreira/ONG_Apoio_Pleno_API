@@ -139,6 +139,7 @@ A API possui rotas estruturadas para as 7 entidades principais do projeto. Todas
 | Manutenções| `/api/manutencoes`      | GET,POST,PUT,DELETE  | Controle e gestão de manutenção |
 |Doações        | `/api/doacoes`          | GET, POST  | Entrada e saída de mantimentos/equipamentos doados. |
 | Entregas    | `/api/entregas`      | GET, POST  | Histórico e controle de entregas de doações. |
+| Dashboard    | `/api/dashboard`      | GET | Retorna os indicadores e métricas gerais do dashboard. |
 | Usuários       | `/api/usuarios/login`   | POST                     | Autenticação de Administrador. |
 
 -----
