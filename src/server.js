@@ -26,6 +26,7 @@ app.use(express.json());
 // Servindo arquivos estáticos da pasta public (para a logo funcionar)
 app.use(express.static(path.join(__dirname, "../public")));
 
+
 //Ligação das Rotas
 app.use("/api/equipamentos", equipamentosRoutes);
 app.use("/api/beneficiarios", beneficiariosRoutes);

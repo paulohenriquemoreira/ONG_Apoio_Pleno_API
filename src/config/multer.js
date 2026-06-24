@@ -1,21 +1,30 @@
 const multer = require("multer");
 const path = require("path");
 
+// 💾 1. CONFIGURAÇÃO DE ARMAZENAMENTO (Onde e como salvar)
 const storage = multer.diskStorage({
-  
+  // Caminho aqui para apontar para dentro de public 👇
+  destination: (req, file, cb) => {
+    cb(null, "public/upload/");
+  },
+  filename: (req, file, cb) => {
+    const sufixoUnico = Date.now() + "-" + Math.round(Math.random() * 1E9);
+    const extensao = path.extname(file.originalname);
+    cb(null, file.fieldname + "-" + sufixoUnico + extensao);
+  }
 });
 
-// A REGRA DE OURO DAS EXTENSÕES
+// 🛡️ 2. A REGRA DE OURO DAS EXTENSÕES (Filtro de segurança)
 const fileFilter = (req, file, cb) => {
   const extensoesPermitidas = /jpeg|jpg|png|tiff|jfif|webp/i;
   
-  // 1. Verifica a extensão
+  // Verifica a extensão do arquivo
   const extname = extensoesPermitidas.test(path.extname(file.originalname));
   
-  // 🖨️ ISTO VAI MOSTRAR NO TERMINAL O QUE O POSTMAN ENVIOU:
+  // Mostra no terminal do seu servidor o que está tentando entrar
   console.log(`Tentando subir: ${file.originalname} | Mimetype interno: ${file.mimetype}`);
   
-  // 2. Verifica se é imagem OU se é o formato genérico que o Postman manda quando se confunde
+  // Verifica se o arquivo é realmente uma imagem
   const isImage = file.mimetype.startsWith('image/') || file.mimetype === 'application/octet-stream';
 
   if (extname && isImage) {
@@ -25,9 +34,10 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+// 🚀 3. INICIALIZAÇÃO E EXPORTAÇÃO DO MIDDLEWARE
 const upload = multer({ 
     storage: storage,
-    fileFilter: fileFilter // Adiciona o filtro aqui na exportação
+    fileFilter: fileFilter 
 });
 
 module.exports = upload;
