@@ -159,33 +159,39 @@ const equipamentosController = {
       const { id } = req.params;
       const db = await conectarBanco();
 
-      // 1. Busca o equipamento para verificar o status
+      // 1. Verifica se existe
       const equipamento = await db.get(
         `SELECT nome, status FROM equipamentos WHERE id = ?`,
         [id],
       );
+      if (!equipamento)
+        return res.status(404).json({ mensagem: "Não encontrado." });
 
-      if (!equipamento) {
-        return res
-          .status(404)
-          .json({ mensagem: "Equipamento não encontrado." });
-      }
-
-      // 2. REGRA DE NEGÓCIO: Só exclui se estiver Disponível
+      // 2. Regra de bloqueio (se não quiser que deletem equipamentos ainda emprestados)
       if (equipamento.status !== "Disponível") {
-        return res.status(400).json({
-          mensagem:
-            "Erro ao excluir. O item pode estar vinculado a um empréstimo ou manutenção. Antes de excluir, altere o status para Disponível.",
-        });
+        return res
+          .status(400)
+          .json({
+            mensagem: "Alterar status para Disponível antes de excluir.",
+          });
       }
 
-      // 3. Se passou pela validação, pode excluir
+      // 3. LIMPEZA MANUAL DAS TABELAS VINCULADAS
+      // Isso evita o erro 500, pois remove as referências antes de deletar o pai
+      await db.run(`DELETE FROM manutencoes WHERE equipamento_id = ?`, [id]);
+      await db.run(`DELETE FROM emprestimos WHERE equipamento_id = ?`, [id]);
+
+      // 4. Agora sim, deleta o equipamento
       await db.run(`DELETE FROM equipamentos WHERE id = ?`, [id]);
 
-      res.status(200).json({ mensagem: "Excluído com sucesso!" });
+      res.status(200).json({ mensagem: "Equipamento removido com sucesso!" });
     } catch (error) {
-      console.error("Erro ao deletar:", error);
-      res.status(500).json({ mensagem: "Erro interno no servidor." });
+      console.error("❌ Erro no Back-end:", error);
+      res
+        .status(500)
+        .json({
+          mensagem: "Erro ao remover. Verifique se não há outros vínculos.",
+        });
     }
   },
 };
