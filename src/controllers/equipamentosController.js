@@ -154,38 +154,38 @@ const equipamentosController = {
   },
 
   //Função de Deletar registro
-  //Função de Deletar registro
   deletar: async (req, res) => {
     try {
       const { id } = req.params;
-
-      // 1. Conectar ao banco
       const db = await conectarBanco();
 
-      // 2. Busca o equipamento antes de deletar para saber se ele existe
+      // 1. Busca o equipamento para verificar o status
       const equipamento = await db.get(
-        `SELECT nome FROM equipamentos WHERE id = ?`,
+        `SELECT nome, status FROM equipamentos WHERE id = ?`,
         [id],
       );
 
-      // 3. Se a busca voltou vazia, ele nem tenta deletar
       if (!equipamento) {
-        return res.status(404).json({
-          mensagem: `O equipamento de ID ${id} não foi encontrado para exclusão.`,
+        return res
+          .status(404)
+          .json({ mensagem: "Equipamento não encontrado." });
+      }
+
+      // 2. REGRA DE NEGÓCIO: Só exclui se estiver Disponível
+      if (equipamento.status !== "Disponível") {
+        return res.status(400).json({
+          mensagem:
+            "Erro ao excluir. O item pode estar vinculado a um empréstimo ou manutenção. Antes de excluir, altere o status para Disponível.",
         });
       }
 
-      // 4. Deletar da tabela correta ('equipamentos')
+      // 3. Se passou pela validação, pode excluir
       await db.run(`DELETE FROM equipamentos WHERE id = ?`, [id]);
 
-      res.status(200).json({
-        mensagem: `O equipamento "${equipamento.nome}" foi deletado com sucesso!`,
-      });
+      res.status(200).json({ mensagem: "Excluído com sucesso!" });
     } catch (error) {
-      console.error("❌ Erro ao deletar equipamento por ID:", error);
-      res
-        .status(500)
-        .json({ mensagem: "Erro interno ao deletar o equipamento." });
+      console.error("Erro ao deletar:", error);
+      res.status(500).json({ mensagem: "Erro interno no servidor." });
     }
   },
 };
