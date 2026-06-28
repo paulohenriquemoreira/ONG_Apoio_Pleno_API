@@ -38,7 +38,7 @@ const equipamentosController = {
       // O banco busca os dados e guarda na variável 'equipamentos'
       const equipamentoEspecifico = await db.get(
         `SELECT * FROM equipamentos WHERE id = ?`,
-        [id]
+        [id],
       );
 
       //Se busca não localizou registro
@@ -68,7 +68,7 @@ const equipamentosController = {
         descricao,
         categoria,
         numero_serie,
-        status,  // O front PODE mandar o status (ex: "Em manutenção")
+        status, // O front PODE mandar o status (ex: "Em manutenção")
         data_aquisicao,
         observacoes,
       } = req.body;
@@ -141,11 +141,9 @@ const equipamentosController = {
           .json({ mensagem: "Equipamento não encontrado." });
       }
 
-      res
-        .status(200)
-        .json({
-          mensagem: `Dados do equipamento ${nome} atualizados com sucesso!`,
-        });
+      res.status(200).json({
+        mensagem: `Dados do equipamento ${nome} atualizados com sucesso!`,
+      });
     } catch (error) {
       // O catch fica só para erros graves do servidor
       console.error("❌ Erro ao atualizar equipamento por ID:", error);
@@ -156,38 +154,34 @@ const equipamentosController = {
   },
 
   //Função de Deletar registro
+  //Função de Deletar registro
   deletar: async (req, res) => {
     try {
       const { id } = req.params;
 
-      // Usar a função de conectar ao banco!
+      // 1. Conectar ao banco
       const db = await conectarBanco();
 
-      //Busca o equipamento antes de deletar para saber o nome dele
+      // 2. Busca o equipamento antes de deletar para saber se ele existe
       const equipamento = await db.get(
         `SELECT nome FROM equipamentos WHERE id = ?`,
         [id],
       );
 
-      // Se a busca voltou vazia, ele nem tenta deletar
+      // 3. Se a busca voltou vazia, ele nem tenta deletar
       if (!equipamento) {
-        return res
-          .status(404)
-          .json({
-            mensagem: `O equipamento de ID ${id} não foi encontrado para exclusão.`,
-          });
+        return res.status(404).json({
+          mensagem: `O equipamento de ID ${id} não foi encontrado para exclusão.`,
+        });
       }
 
-        // Caso exista, será deletado
-        await db.run(`DELETE FROM equipamentos WHERE id = ?`, [id]);
+      // 4. Deletar da tabela correta ('equipamentos')
+      await db.run(`DELETE FROM equipamentos WHERE id = ?`, [id]);
 
-        res
-          .status(200)
-          .json({
-            mensagem: `O equipamento emprestado "${equipamento.nome}" foi deletado com sucesso!`,
-          });
+      res.status(200).json({
+        mensagem: `O equipamento "${equipamento.nome}" foi deletado com sucesso!`,
+      });
     } catch (error) {
-      // O catch fica só para erros graves do servidor
       console.error("❌ Erro ao deletar equipamento por ID:", error);
       res
         .status(500)
