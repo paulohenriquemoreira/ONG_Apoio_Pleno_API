@@ -172,7 +172,7 @@ const equipamentosController = {
         return res
           .status(400)
           .json({
-            mensagem: "Alterar status para Disponível antes de excluir.",
+            mensagem: "Erro ao excluir. O item pode estar vinculado a um empréstimo ou manutenção. Antes de excluir, altere o status para Disponível.",
           });
       }
 
