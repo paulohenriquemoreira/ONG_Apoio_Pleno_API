@@ -179,7 +179,7 @@ const equipamentosController = {
       }
 
         // Caso exista, será deletado
-        await db.run(`DELETE FROM emprestimos WHERE id = ?`, [id]);
+        await db.run(`DELETE FROM equipamentos WHERE id = ?`, [id]);
 
         res
           .status(200)
