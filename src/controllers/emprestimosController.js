@@ -98,17 +98,36 @@ const emprestimosController = {
   renovar: async (req, res) => {
     try {
       const { id } = req.params;
-      // Corrigido para buscar 'data_fim' conforme enviado pelo front
-      const { data_fim } = req.body;
       const db = await conectarBanco();
 
-      await db.run(`UPDATE emprestimos SET data_fim = ? WHERE id = ?`, [
-        data_fim,
-        id,
-      ]);
-      res.status(200).json({ mensagem: "Renovado com sucesso!" });
+      // Busca dados atuais
+      const emp = await db.get(`SELECT * FROM emprestimos WHERE id = ?`, [id]);
+      if (!emp)
+        return res.status(404).json({ mensagem: "Empréstimo não encontrado." });
+
+      const hoje = new Date();
+      const data_inicio = hoje.toISOString().split("T")[0]; // Data da renovação vira a nova data de empréstimo
+
+      // Previsão: 15 dias após a data da renovação
+      const data_fim = new Date(hoje);
+      data_fim.setDate(data_fim.getDate() + 15);
+      const data_fim_str = data_fim.toISOString().split("T")[0];
+
+      // Regra de Alerta: se o período total passar de 30 dias desde o início original
+      const dataOriginal = new Date(emp.data_inicio);
+      const diferencaDias = (hoje - dataOriginal) / (1000 * 60 * 60 * 24);
+      const precisaAlerta = diferencaDias > 30;
+
+      await db.run(
+        `UPDATE emprestimos SET data_inicio = ?, data_fim = ? WHERE id = ?`,
+        [data_inicio, data_fim_str, id],
+      );
+
+      res.status(200).json({
+        mensagem: "Renovado com sucesso!",
+        precisaAlerta: precisaAlerta, // O front-end usa isso para abrir o aviso
+      });
     } catch (error) {
-      console.error("Erro na renovação:", error);
       res.status(500).json({ mensagem: "Erro ao renovar." });
     }
   },
