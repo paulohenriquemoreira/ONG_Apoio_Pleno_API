@@ -5,7 +5,6 @@ const emprestimosController = require("../controllers/emprestimosController"); /
 
 // GET: Buscar informações
 rotas.get("/", emprestimosController.listarTodos);
-rotas.get("/:id", emprestimosController.listarPorId);
 
 
 // POST: Cria um novo registro
