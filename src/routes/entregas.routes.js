@@ -11,7 +11,7 @@ rotas.get("/:id", entregasController.listarPorId);
 // POST: Cria um novo registro
 rotas.post("/", entregasController.cadastrar);
 
-//(Em ONG por questão de auditoriaS internas não utilizarei rotas de PUT-atualizar, DELETE-deletar)
-
+// DELETE: Deleta registro - utilizado para cancelamento
+rotas.delete('/entregas/:id', entregasController.deletar);
 
 module.exports = rotas;

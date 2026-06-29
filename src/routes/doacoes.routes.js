@@ -12,4 +12,8 @@ rotas.get("/:id", doacoesController.listarPorId);
 // POST: Cria um novo registro
 rotas.post("/", doacoesController.cadastrar);
 
+
+// PUT: Atualiza registro
+rotas.put('/doacoes/:id', doacoesController.atualizar);
+
 module.exports = rotas;
