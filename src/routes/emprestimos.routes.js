@@ -1,22 +1,18 @@
 const express = require("express");
-const rotas = express.Router();  //cria um Filtro de Linha para ligar no server.js
-const emprestimosController = require("../controllers/emprestimosController"); //Importa o controller (garçom)
+const rotas = express.Router();
+const emprestimosController = require("../controllers/emprestimosController");
 
+// ADICIONE ESTE LOG PARA DEPURAR
+console.log("DEBUGANDO EMPRESTIMOS CONTROLLER:");
+console.log("listarTodos é função?", typeof emprestimosController.listarTodos === 'function');
+console.log("cadastrar é função?", typeof emprestimosController.cadastrar === 'function');
+console.log("devolver é função?", typeof emprestimosController.devolver === 'function');
+console.log("renovar é função?", typeof emprestimosController.renovar === 'function');
 
-// GET: Buscar informações
 rotas.get("/", emprestimosController.listarTodos);
-
-
-// POST: Cria um novo registro
 rotas.post("/", emprestimosController.cadastrar);
-
-
-// PUT: Atualizar um registro existente
 rotas.put('/devolver/:id', emprestimosController.devolver);
 rotas.put('/renovar/:id', emprestimosController.renovar);
-
-
-// DELETE: Deletar um registro 
 rotas.delete("/:id", emprestimosController.deletar);
 
 module.exports = rotas;
