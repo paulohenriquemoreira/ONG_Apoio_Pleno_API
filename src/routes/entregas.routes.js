@@ -12,6 +12,6 @@ rotas.get("/:id", entregasController.listarPorId);
 rotas.post("/", entregasController.cadastrar);
 
 // DELETE: Deleta registro - utilizado para cancelamento
-rotas.delete('/entregas/:id', entregasController.deletar);
+rotas.delete("/:id", entregasController.deletar);
 
 module.exports = rotas;
