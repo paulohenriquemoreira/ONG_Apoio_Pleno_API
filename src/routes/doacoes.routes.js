@@ -14,6 +14,6 @@ rotas.post("/", doacoesController.cadastrar);
 
 
 // PUT: Atualiza registro
-rotas.put('/doacoes/:id', doacoesController.atualizar);
+rotas.put('/:id', doacoesController.atualizar);
 
 module.exports = rotas;

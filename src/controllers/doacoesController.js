@@ -1,6 +1,7 @@
 const conectarBanco = require("../config/database");
 
 const doacoesController = {
+  // Função para listar todas doações
   listarTodos: async (req, res) => {
     try {
       const db = await conectarBanco();
@@ -12,6 +13,7 @@ const doacoesController = {
     }
   },
 
+  // Função lista doação específica
   listarPorId: async (req, res) => {
     try {
       const { id } = req.params;
@@ -21,10 +23,12 @@ const doacoesController = {
         return res.status(404).json({ mensagem: "Doação não encontrada." });
       res.status(200).json(doacao);
     } catch (error) {
+      console.error("❌ Erro ao buscar doação por ID:", error);
       res.status(500).json({ mensagem: "Erro interno." });
     }
   },
 
+  // Função cadastrar nova doação
   cadastrar: async (req, res) => {
     try {
       const {
@@ -69,14 +73,19 @@ const doacoesController = {
         .status(201)
         .json({ mensagem: "Doação registrada!", id_doacao: resultado.lastID });
     } catch (error) {
+      console.error("❌ Erro ao cadastrar doação:", error);
       res.status(500).json({ mensagem: "Erro ao registrar doação." });
     }
   },
 
-  // ADICIONADO: Função para permitir que o modal de edição salve
+  // Função para atualizar doação
   atualizar: async (req, res) => {
     try {
       const { id } = req.params;
+      if (!id) {
+        return res.status(400).json({ mensagem: "ID da doação não fornecido." });
+      }
+
       const {
         doador,
         categoria,
@@ -85,14 +94,21 @@ const doacoesController = {
         unidade_medida,
         observacoes,
       } = req.body;
+      
       const db = await conectarBanco();
 
-      await db.run(
+      const resultado = await db.run(
         `UPDATE doacoes SET doador=?, categoria=?, item=?, quantidade=?, unidade_medida=?, observacoes=? WHERE id=?`,
         [doador, categoria, item, quantidade, unidade_medida, observacoes, id],
       );
+
+      if (resultado.changes === 0) {
+        return res.status(404).json({ mensagem: "Doação não encontrada para atualização." });
+      }
+
       res.status(200).json({ mensagem: "Doação atualizada com sucesso!" });
     } catch (error) {
+      console.error("❌ Erro ao atualizar doação:", error);
       res.status(500).json({ mensagem: "Erro ao atualizar doação." });
     }
   },
