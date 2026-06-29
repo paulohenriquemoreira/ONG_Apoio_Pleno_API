@@ -13,7 +13,8 @@ rotas.post("/", emprestimosController.cadastrar);
 
 
 // PUT: Atualizar um registro existente
-rotas.put("/:id", emprestimosController.atualizar);
+rotas.put('/devolver/:id', emprestimosController.devolver);
+rotas.put('/renovar/:id', emprestimosController.renovar);
 
 
 // DELETE: Deletar um registro 
