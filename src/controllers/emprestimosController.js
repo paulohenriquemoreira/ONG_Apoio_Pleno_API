@@ -94,18 +94,21 @@ const emprestimosController = {
   },
 
   // ROTA ESPECÍFICA PARA RENOVAÇÃO
+
   renovar: async (req, res) => {
     try {
       const { id } = req.params;
-      const { nova_data } = req.body;
+      // Corrigido para buscar 'data_fim' conforme enviado pelo front
+      const { data_fim } = req.body;
       const db = await conectarBanco();
 
       await db.run(`UPDATE emprestimos SET data_fim = ? WHERE id = ?`, [
-        nova_data,
+        data_fim,
         id,
       ]);
       res.status(200).json({ mensagem: "Renovado com sucesso!" });
     } catch (error) {
+      console.error("Erro na renovação:", error);
       res.status(500).json({ mensagem: "Erro ao renovar." });
     }
   },
