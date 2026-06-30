@@ -88,102 +88,47 @@ const beneficiariosController = {
   },
 
   // Atualiza os dados de um beneficiário existente e substitui a foto antiga se uma nova for enviada.
-  atualizar: async (req, res) => {
+ atualizar: async (req, res) => {
     try {
       const { id } = req.params;
-      const {
-        nome,
-        documento,
-        email,
-        telefone,
-        endereco,
-        data_nascimento,
-        data_cadastro,
-      } = req.body;
-
+      const { nome, documento, email, telefone, endereco, data_nascimento, data_cadastro } = req.body;
       const db = await conectarBanco();
+      
+      const beneficiarioAntigo = await db.get(`SELECT * FROM beneficiarios WHERE id = ?`, [id]);
 
-      // Resgata os dados antigos para evitar sobrescrever colunas com valores nulos indevidamente.
-      const beneficiarioAntigo = await db.get(
-        `SELECT * FROM beneficiarios WHERE id = ?`,
-        [id],
-      );
-
-      // Bloqueia a execução caso o registro alvo não exista no banco.
       if (!beneficiarioAntigo) {
-        return res
-          .status(404)
-          .json({ mensagem: "Beneficiário não encontrado para atualização." });
+        return res.status(404).json({ mensagem: "Beneficiário não encontrado." });
       }
 
-      let nomeDaFoto;
+      let nomeDaFoto = beneficiarioAntigo.foto;
 
-      // Define a manipulação do arquivo: substitui e exclui a foto antiga ou mantém a atual.
       if (req.file) {
         nomeDaFoto = req.file.filename;
-
         if (beneficiarioAntigo.foto) {
-          const caminhoFotoAntiga = path.join(
-            __dirname,
-            "../../public/uploads",
-            beneficiarioAntigo.foto,
-          );
-
-          try {
-            if (fs.existsSync(caminhoFotoAntiga)) {
-              fs.unlinkSync(caminhoFotoAntiga);
-            }
-          } catch (errFoto) {
-            console.error(
-              "Aviso: Falha ao deletar a foto antiga, prosseguindo com a edição.",
-              errFoto,
-            );
-          }
+          const caminhoFotoAntiga = path.join(__dirname, "../../public/uploads", beneficiarioAntigo.foto);
+          if (fs.existsSync(caminhoFotoAntiga)) fs.unlinkSync(caminhoFotoAntiga);
         }
-      } else {
-        nomeDaFoto = beneficiarioAntigo.foto;
       }
 
-      // Preenche eventuais lacunas da requisição utilizando os dados pré-existentes do usuário.
-      const nomeFinal = nome || beneficiarioAntigo.nome;
-      const documentoFinal = documento || beneficiarioAntigo.documento;
-      const emailFinal = email || beneficiarioAntigo.email;
-      const telefoneFinal = telefone || beneficiarioAntigo.telefone;
-      const enderecoFinal = endereco || beneficiarioAntigo.endereco;
-      const nascimentoFinal =
-        data_nascimento || beneficiarioAntigo.data_nascimento;
-      const cadastroFinal = data_cadastro || beneficiarioAntigo.data_cadastro;
-
-      // Executa a instrução de atualização no banco de dados com os valores unificados.
-      const resultado = await db.run(
+      await db.run(
         `UPDATE beneficiarios SET nome=?, documento=?, email=?, telefone=?, endereco=?, foto=?, data_nascimento=?, data_cadastro=? WHERE id = ?`,
         [
-          nomeFinal,
-          documentoFinal,
-          emailFinal,
-          telefoneFinal,
-          enderecoFinal,
+          nome || beneficiarioAntigo.nome,
+          documento || beneficiarioAntigo.documento,
+          email || beneficiarioAntigo.email,
+          telefone || beneficiarioAntigo.telefone,
+          endereco || beneficiarioAntigo.endereco,
           nomeDaFoto,
-          nascimentoFinal,
-          cadastroFinal,
+          data_nascimento || beneficiarioAntigo.data_nascimento,
+          data_cadastro || beneficiarioAntigo.data_cadastro,
           id,
-        ],
+        ]
       );
 
-      if (resultado.changes === 0) {
-        return res
-          .status(400)
-          .json({ mensagem: "Nenhuma alteração foi realizada." });
-      }
-
-      res.status(200).json({
-        mensagem: `Dados do beneficiário atualizados com sucesso!`,
-      });
+      res.status(200).json({ mensagem: "Atualizado com sucesso!" });
     } catch (error) {
-      console.error("❌ Erro ao atualizar beneficiário por ID:", error);
-      res
-        .status(500)
-        .json({ mensagem: "Erro interno ao atualizar o beneficiário." });
+      console.error("❌ Erro:", error);
+      res.status(500).json({ mensagem: "Erro interno no servidor." });
     }
   },
 
