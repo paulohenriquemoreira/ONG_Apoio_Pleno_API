@@ -150,7 +150,7 @@ const beneficiariosController = {
     }
   },
 
-  // Exclui permanentemente o registro de um beneficiário, liberando suas dependências (empréstimos/entregas) e a foto.
+  // Exclui permanentemente o registro de um beneficiário, limpando as chaves estrangeiras e a foto com segurança.
   deletar: async (req, res) => {
     try {
       const { id } = req.params;
@@ -168,14 +168,22 @@ const beneficiariosController = {
         });
       }
 
-      // Remove preventivamente os vínculos nas tabelas dependentes para liberar os equipamentos e registros associados.
+      // Inicia a transação e desativa temporariamente as restrições de foreign key para garantir a limpeza completa
+      await db.run(`BEGIN TRANSACTION`);
+      await db.run(`PRAGMA foreign_keys = OFF`);
+
+      // Remove os registros vinculados nas tabelas filhas liberando os equipamentos e dependências
       await db.run(`DELETE FROM emprestimos WHERE beneficiario_id = ?`, [id]);
       await db.run(`DELETE FROM entregas WHERE beneficiario_id = ?`, [id]);
 
-      // Procede com a exclusão definitiva do registro principal.
+      // Remove o registro principal do beneficiário
       await db.run(`DELETE FROM beneficiarios WHERE id = ?`, [id]);
 
-      // Remove a foto do disco rígido somente se o registro for excluído com sucesso do banco.
+      // Reativa as chaves estrangeiras e confirma a transação
+      await db.run(`PRAGMA foreign_keys = ON`);
+      await db.run(`COMMIT`);
+
+      // Remove a foto do disco rígido somente após a transação ser concluída com sucesso no banco
       if (beneficiario.foto) {
         const caminhoFoto = path.join(
           __dirname,
@@ -198,10 +206,21 @@ const beneficiariosController = {
         mensagem: `O beneficiário "${beneficiario.nome}" e seus vínculos foram deletados com sucesso!`,
       });
     } catch (error) {
+      // Em caso de qualquer falha, desfaz a transação para preservar a integridade do banco de dados
+      try {
+        const db = await conectarBanco();
+        await db.run(`ROLLBACK`);
+        await db.run(`PRAGMA foreign_keys = ON`);
+      } catch (rollbackErr) {
+        console.error("Erro no rollback:", rollbackErr);
+      }
+
       console.error("❌ Erro ao deletar beneficiário por ID:", error);
       res
         .status(500)
-        .json({ mensagem: "Erro interno ao deletar o beneficiário." });
+        .json({
+          mensagem: "Erro interno ao deletar o beneficiário e seus vínculos.",
+        });
     }
   },
 };
