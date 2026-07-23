@@ -12,6 +12,7 @@ const entregasController = {
       const entregas = await db.all(query);
       res.status(200).json(entregas);
     } catch (error) {
+      console.error("Erro ao buscar entregas:", error);
       res.status(500).json({ mensagem: "Erro ao buscar entregas." });
     }
   },
@@ -41,18 +42,17 @@ const entregasController = {
         [beneficiario_id, item, categoria, quantidade, dataHoje, observacoes],
       );
 
-      res
-        .status(201)
-        .json({
-          mensagem: "Entrega registrada!",
-          id_entrega: resultado.lastID,
-        });
+      res.status(201).json({
+        mensagem: "Entrega registrada!",
+        id_entrega: resultado.lastID,
+      });
     } catch (error) {
+      console.error("Erro ao registrar entrega:", error);
       res.status(500).json({ mensagem: "Erro ao registrar entrega." });
     }
   },
 
-  // ADICIONADO: Função para permitir o cancelamento da entrega
+  // Permite o cancelamento/exclusão da entrega
   deletar: async (req, res) => {
     try {
       const { id } = req.params;

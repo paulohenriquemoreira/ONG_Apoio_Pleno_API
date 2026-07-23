@@ -63,8 +63,8 @@ const beneficiariosController = {
 
       const resultado = await db.run(
         `
-                INSERT INTO beneficiarios (nome, documento, email, telefone, endereco, foto, data_nascimento, data_cadastro)
-                VALUES(?,?,?,?,?,?,?,?)`,
+            INSERT INTO beneficiarios (nome, documento, email, telefone, endereco, foto, data_nascimento, data_cadastro)
+            VALUES(?,?,?,?,?,?,?,?)`,
         [
           nome,
           documento,
@@ -88,16 +88,29 @@ const beneficiariosController = {
   },
 
   // Atualiza os dados de um beneficiário existente e substitui a foto antiga se uma nova for enviada.
- atualizar: async (req, res) => {
+  atualizar: async (req, res) => {
     try {
       const { id } = req.params;
-      const { nome, documento, email, telefone, endereco, data_nascimento, data_cadastro } = req.body;
+      const {
+        nome,
+        documento,
+        email,
+        telefone,
+        endereco,
+        data_nascimento,
+        data_cadastro,
+      } = req.body;
       const db = await conectarBanco();
-      
-      const beneficiarioAntigo = await db.get(`SELECT * FROM beneficiarios WHERE id = ?`, [id]);
+
+      const beneficiarioAntigo = await db.get(
+        `SELECT * FROM beneficiarios WHERE id = ?`,
+        [id],
+      );
 
       if (!beneficiarioAntigo) {
-        return res.status(404).json({ mensagem: "Beneficiário não encontrado." });
+        return res
+          .status(404)
+          .json({ mensagem: "Beneficiário não encontrado." });
       }
 
       let nomeDaFoto = beneficiarioAntigo.foto;
@@ -105,8 +118,13 @@ const beneficiariosController = {
       if (req.file) {
         nomeDaFoto = req.file.filename;
         if (beneficiarioAntigo.foto) {
-          const caminhoFotoAntiga = path.join(__dirname, "../../public/uploads", beneficiarioAntigo.foto);
-          if (fs.existsSync(caminhoFotoAntiga)) fs.unlinkSync(caminhoFotoAntiga);
+          const caminhoFotoAntiga = path.join(
+            __dirname,
+            "../../public/uploads",
+            beneficiarioAntigo.foto,
+          );
+          if (fs.existsSync(caminhoFotoAntiga))
+            fs.unlinkSync(caminhoFotoAntiga);
         }
       }
 
@@ -122,7 +140,7 @@ const beneficiariosController = {
           data_nascimento || beneficiarioAntigo.data_nascimento,
           data_cadastro || beneficiarioAntigo.data_cadastro,
           id,
-        ]
+        ],
       );
 
       res.status(200).json({ mensagem: "Atualizado com sucesso!" });
@@ -132,7 +150,7 @@ const beneficiariosController = {
     }
   },
 
-  // Exclui permanentemente o registro de um beneficiário e seu respectivo arquivo de foto.
+  // Exclui permanentemente o registro de um beneficiário, liberando suas dependências (empréstimos/entregas) e a foto.
   deletar: async (req, res) => {
     try {
       const { id } = req.params;
@@ -150,7 +168,11 @@ const beneficiariosController = {
         });
       }
 
-      // Procede com a tentativa de exclusão direta na tabela principal.
+      // Remove preventivamente os vínculos nas tabelas dependentes para liberar os equipamentos e registros associados.
+      await db.run(`DELETE FROM emprestimos WHERE beneficiario_id = ?`, [id]);
+      await db.run(`DELETE FROM entregas WHERE beneficiario_id = ?`, [id]);
+
+      // Procede com a exclusão definitiva do registro principal.
       await db.run(`DELETE FROM beneficiarios WHERE id = ?`, [id]);
 
       // Remove a foto do disco rígido somente se o registro for excluído com sucesso do banco.
@@ -173,19 +195,10 @@ const beneficiariosController = {
       }
 
       res.status(200).json({
-        mensagem: `O beneficiário "${beneficiario.nome}" foi deletado com sucesso!`,
+        mensagem: `O beneficiário "${beneficiario.nome}" e seus vínculos foram deletados com sucesso!`,
       });
     } catch (error) {
       console.error("❌ Erro ao deletar beneficiário por ID:", error);
-
-      // Captura a restrição estrutural de chave estrangeira comunicando o bloqueio de forma legível.
-      if (error.message && error.message.includes("FOREIGN KEY")) {
-        return res.status(400).json({
-          mensagem:
-            "Bloqueado: Este beneficiário possui empréstimos ou entregas e não pode ser excluído diretamente.",
-        });
-      }
-
       res
         .status(500)
         .json({ mensagem: "Erro interno ao deletar o beneficiário." });
